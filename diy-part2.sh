@@ -138,3 +138,131 @@ sed -i 's|admin/services/nlbw/backup|admin/nlbw/backup|g' package/feeds/luci/luc
 mkdir -p files/etc
 echo "# Defaults are configured in /etc/sysctl.d/* and can be customized in this file" > files/etc/sysctl.conf
 echo "net.core.rmem_max=524288" >> files/etc/sysctl.conf
+
+# =================================================================
+#        以下为新增：ImmortalWrt 傲腾固态 8G 专属全功能定制脚本
+# =================================================================
+
+# ----------------- 1. 空间物理扩容 -----------------
+# 根目录物理分区直接拉满到 8G
+echo "CONFIG_TARGET_ROOTFS_PARTSIZE=8192" >> .config
+# 引导分区加大到 64M，确保内核和后续包不拥挤
+sed -i 's/CONFIG_TARGET_KERNEL_PARTSIZE=.*/CONFIG_TARGET_KERNEL_PARTSIZE=64/g' include/target.mk
+
+# ----------------- 2. 强行锁死：你提供的高级核心包清单 -----------------
+echo "CONFIG_PACKAGE_6relayd=y" >> .config
+echo "CONFIG_PACKAGE_apk-openssl=y" >> .config
+echo "CONFIG_PACKAGE_autocore=y" >> .config
+echo "CONFIG_PACKAGE_automount=y" >> .config
+echo "CONFIG_PACKAGE_base-files=y" >> .config
+echo "CONFIG_PACKAGE_block-mount=y" >> .config
+echo "CONFIG_PACKAGE_ca-bundle=y" >> .config
+echo "CONFIG_PACKAGE_default-settings-chn=y" >> .config
+echo "CONFIG_PACKAGE_dnsmasq-full=y" >> .config
+echo "CONFIG_PACKAGE_fdisk=y" >> .config
+echo "CONFIG_PACKAGE_firewall4=y" >> .config
+echo "CONFIG_PACKAGE_font-wqy=y" >> .config
+echo "CONFIG_PACKAGE_fstools=y" >> .config
+echo "CONFIG_PACKAGE_grub2-bios-setup=y" >> .config
+echo "CONFIG_PACKAGE_htop=y" >> .config
+echo "CONFIG_PACKAGE_i915-firmware-dmc=y" >> .config
+
+# 全套有线与 USB 网卡驱动
+echo "CONFIG_PACKAGE_kmod-8139cp=y" >> .config
+echo "CONFIG_PACKAGE_kmod-8139too=y" >> .config
+echo "CONFIG_PACKAGE_kmod-amazon-ena=y" >> .config
+echo "CONFIG_PACKAGE_kmod-amd-xgbe=y" >> .config
+echo "CONFIG_PACKAGE_kmod-bnx2=y" >> .config
+echo "CONFIG_PACKAGE_kmod-button-hotplug=y" >> .config
+echo "CONFIG_PACKAGE_kmod-drm-i915=y" >> .config
+echo "CONFIG_PACKAGE_kmod-dwmac-intel=y" >> .config
+echo "CONFIG_PACKAGE_kmod-e1000=y" >> .config
+echo "CONFIG_PACKAGE_kmod-e1000e=y" >> .config
+echo "CONFIG_PACKAGE_kmod-forcedeth=y" >> .config
+echo "CONFIG_PACKAGE_kmod-fs-ext4=y" >> .config
+echo "CONFIG_PACKAGE_kmod-fs-f2fs=y" >> .config
+echo "CONFIG_PACKAGE_kmod-fs-ntfs3=y" >> .config
+echo "CONFIG_PACKAGE_kmod-fs-vfat=y" >> .config
+echo "CONFIG_PACKAGE_kmod-i40e=y" >> .config
+echo "CONFIG_PACKAGE_kmod-igb=y" >> .config
+echo "CONFIG_PACKAGE_kmod-igbvf=y" >> .config
+echo "CONFIG_PACKAGE_kmod-igc=y" >> .config
+echo "CONFIG_PACKAGE_kmod-ixgbe=y" >> .config
+echo "CONFIG_PACKAGE_kmod-ixgbevf=y" >> .config
+echo "CONFIG_PACKAGE_kmod-nf-nathelper=y" >> .config
+echo "CONFIG_PACKAGE_kmod-nf-nathelper-extra=y" >> .config
+echo "CONFIG_PACKAGE_kmod-nft-offload=y" >> .config
+echo "CONFIG_PACKAGE_kmod-pcnet32=y" >> .config
+echo "CONFIG_PACKAGE_kmod-r8101=y" >> .config
+echo "CONFIG_PACKAGE_kmod-r8125=y" >> .config
+echo "CONFIG_PACKAGE_kmod-r8126=y" >> .config
+echo "CONFIG_PACKAGE_kmod-r8168=y" >> .config
+echo "CONFIG_PACKAGE_kmod-tg3=y" >> .config
+echo "CONFIG_PACKAGE_kmod-tulip=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-core=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-hid=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-net=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-net-asix=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-net-rtl8150=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-net-rtl8152-vendor=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-ohci=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-storage=y" >> .config
+echo "CONFIG_PACKAGE_kmod-usb-uhci=y" >> .config
+echo "CONFIG_PACKAGE_kmod-vmxnet3=y" >> .config
+
+# 依赖库
+echo "CONFIG_PACKAGE_libc=y" >> .config
+echo "CONFIG_PACKAGE_libgcc=y" >> .config
+echo "CONFIG_PACKAGE_libiconv=y" >> .config
+echo "CONFIG_PACKAGE_libustream-openssl=y" >> .config
+echo "CONFIG_PACKAGE_libc-libintl=y" >> .config
+echo "CONFIG_PACKAGE_logd=y" >> .config
+
+# LuCI 网页应用及皮肤
+echo "CONFIG_PACKAGE_luci-app-attendedsysupgrade=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-package-manager=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-statistics=y" >> .config
+echo "CONFIG_PACKAGE_luci-app-ttyd=y" >> .config
+echo "CONFIG_PACKAGE_luci-compat=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-attendedsysupgrade-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-base-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-commands-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-vpn-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_luci-lib-base=y" >> .config
+echo "CONFIG_PACKAGE_luci-lib-ipkg=y" >> .config
+echo "CONFIG_PACKAGE_luci-light=y" >> .config
+echo "CONFIG_PACKAGE_luci-theme-argon=y" >> .config
+
+# 关键网络组件与 IPv6 环境
+echo "CONFIG_PACKAGE_miniupnpd=y" >> .config
+echo "CONFIG_PACKAGE_mkf2fs=y" >> .config
+echo "CONFIG_PACKAGE_mtd=y" >> .config
+echo "CONFIG_PACKAGE_nano=y" >> .config
+echo "CONFIG_PACKAGE_netifd=y" >> .config
+echo "CONFIG_PACKAGE_nftables=y" >> .config
+echo "CONFIG_PACKAGE_odhcp6c=y" >> .config
+echo "CONFIG_PACKAGE_odhcpd-ipv6only=y" >> .config
+echo "CONFIG_PACKAGE_openssh-client=y" >> .config
+echo "CONFIG_PACKAGE_openssh-server=y" >> .config
+echo "CONFIG_PACKAGE_partx-utils=y" >> .config
+echo "CONFIG_PACKAGE_ppp=y" >> .config
+echo "CONFIG_PACKAGE_ppp-mod-pppoe=y" >> .config
+echo "CONFIG_PACKAGE_procd-ujail=y" >> .config
+echo "CONFIG_PACKAGE_qosify=y" >> .config
+echo "CONFIG_PACKAGE_samba4-server=y" >> .config
+echo "CONFIG_PACKAGE_uci=y" >> .config
+echo "CONFIG_PACKAGE_uclient-fetch=y" >> .config
+echo "CONFIG_PACKAGE_urandom-seed=y" >> .config
+echo "CONFIG_PACKAGE_urngd=y" >> .config
+echo "CONFIG_PACKAGE_vnstat=y" >> .config
+
+# ----------------- 3. 额外追加：Docker 全家桶核心 -----------------
+echo "CONFIG_PACKAGE_luci-app-dockerman=y" >> .config
+echo "CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y" >> .config
+echo "CONFIG_PACKAGE_docker-compose=y" >> .config
+echo "CONFIG_PACKAGE_dockerd=y" >> .config
