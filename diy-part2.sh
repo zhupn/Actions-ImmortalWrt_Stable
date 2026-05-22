@@ -15,14 +15,14 @@
 
 #添加软件包
 #OpenClash
-#rm -rf feeds/luci/applications/luci-app-openclash
-#git clone -b master --single-branch --filter=blob:none https://github.com/vernesong/OpenClash.git feeds/luci/applications/luci-app-openclash
+rm -rf feeds/luci/applications/luci-app-openclash
+git clone -b master --single-branch --filter=blob:none https://github.com/vernesong/OpenClash.git feeds/luci/applications/luci-app-openclash
 #AdguardHome
-#git clone https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
+git clone https://github.com/rufengsuixing/luci-app-adguardhome package/luci-app-adguardhome
 #Mihomo
-#git clone -b main --single-branch --filter=blob:none https://github.com/nikkinikki-org/OpenWrt-nikki
-#mv OpenWrt-nikki/luci-app-nikki package/
-#mv OpenWrt-nikki/nikki package/
+git clone -b main --single-branch --filter=blob:none https://github.com/nikkinikki-org/OpenWrt-nikki
+mv OpenWrt-nikki/luci-app-nikki package/
+mv OpenWrt-nikki/nikki package/
 #添加qosmate
 #git clone https://github.com/hudra0/qosmate.git package/qosmate
 #git clone https://github.com/LemonCrab666/luci-app-qosmate.git package/luci-app-qosmate
@@ -140,16 +140,61 @@ echo "# Defaults are configured in /etc/sysctl.d/* and can be customized in this
 echo "net.core.rmem_max=524288" >> files/etc/sysctl.conf
 
 # =================================================================
-#        以下为新增：ImmortalWrt 傲腾固态 8G 专属全功能定制脚本
+#        1. 自动注入：你专属的首次开机初始化网络脚本 (UCI 注入)
 # =================================================================
+mkdir -p files/etc/uci-defaults
 
-# ----------------- 1. 空间物理扩容 -----------------
-# 根目录物理分区直接拉满到 8G
+cat << 'EOF' > files/etc/uci-defaults/99-custom-init
+#!/bin/sh
+
+root_password="$ROOT_PASS"
+lan_ip_address="$LAN_ADD"
+pppoe_username="$PPPOE_USER"
+pppoe_password="$PPPOE_PASS"
+
+exec >/tmp/setup.log 2>&1
+
+if [ -n "$root_password" ]; then
+  (echo "$root_password"; sleep 1; echo "$root_password") | passwd > /dev/null
+fi
+
+uci set network.br_lan=device  
+uci set network.br_lan.name='br-lan'
+uci set network.br_lan.type='bridge'
+uci add_list network.br_lan.ports='eth0'
+uci add_list network.br_lan.ports='eth1'
+uci add_list network.br_lan.ports='eth2'
+uci set network.lan.device='br-lan'
+uci set dhcp.lan.force
+uci set network.lan.ipaddr="$lan_ip_address"
+uci set network.lan.netmask='255.255.255.0'
+uci set network.lan.ip6assign='60'
+uci set network.lan.device='br-lan'
+uci set network.wan.device='eth3'
+uci set network.wan.proto=pppoe
+uci set network.wan.username="$pppoe_username"
+uci set network.wan.password="$pppoe_password"
+uci commit network
+
+uci set luci.lang='zh-cn'
+uci commit luci
+
+exit 0
+EOF
+
+chmod 0755 files/etc/uci-defaults/99-custom-init
+
+
+# =================================================================
+#        2. 空间物理扩容 ── 强行将分区直接拉满到 8G
+# =================================================================
 echo "CONFIG_TARGET_ROOTFS_PARTSIZE=8192" >> .config
-# 引导分区加大到 64M，确保内核和后续包不拥挤
 sed -i 's/CONFIG_TARGET_KERNEL_PARTSIZE=.*/CONFIG_TARGET_KERNEL_PARTSIZE=64/g' include/target.mk
 
-# ----------------- 2. 强行锁死：你提供的高级核心包清单 -----------------
+
+# =================================================================
+#        3. 强行锁死：你提供的 A-Z 核心包清单 (确保一个不少)
+# =================================================================
 echo "CONFIG_PACKAGE_6relayd=y" >> .config
 echo "CONFIG_PACKAGE_apk-openssl=y" >> .config
 echo "CONFIG_PACKAGE_autocore=y" >> .config
@@ -167,7 +212,7 @@ echo "CONFIG_PACKAGE_grub2-bios-setup=y" >> .config
 echo "CONFIG_PACKAGE_htop=y" >> .config
 echo "CONFIG_PACKAGE_i915-firmware-dmc=y" >> .config
 
-# 全套有线与 USB 网卡驱动
+# 网卡与底层驱动
 echo "CONFIG_PACKAGE_kmod-8139cp=y" >> .config
 echo "CONFIG_PACKAGE_kmod-8139too=y" >> .config
 echo "CONFIG_PACKAGE_kmod-amazon-ena=y" >> .config
@@ -211,7 +256,7 @@ echo "CONFIG_PACKAGE_kmod-usb-storage=y" >> .config
 echo "CONFIG_PACKAGE_kmod-usb-uhci=y" >> .config
 echo "CONFIG_PACKAGE_kmod-vmxnet3=y" >> .config
 
-# 依赖库
+# 系统依赖库
 echo "CONFIG_PACKAGE_libc=y" >> .config
 echo "CONFIG_PACKAGE_libgcc=y" >> .config
 echo "CONFIG_PACKAGE_libiconv=y" >> .config
@@ -219,7 +264,7 @@ echo "CONFIG_PACKAGE_libustream-openssl=y" >> .config
 echo "CONFIG_PACKAGE_libc-libintl=y" >> .config
 echo "CONFIG_PACKAGE_logd=y" >> .config
 
-# LuCI 网页应用及皮肤
+# LuCI 界面与 Argon 皮肤
 echo "CONFIG_PACKAGE_luci-app-attendedsysupgrade=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-package-manager=y" >> .config
 echo "CONFIG_PACKAGE_luci-app-statistics=y" >> .config
@@ -238,7 +283,7 @@ echo "CONFIG_PACKAGE_luci-lib-ipkg=y" >> .config
 echo "CONFIG_PACKAGE_luci-light=y" >> .config
 echo "CONFIG_PACKAGE_luci-theme-argon=y" >> .config
 
-# 关键网络组件与 IPv6 环境
+# 网络协议组件
 echo "CONFIG_PACKAGE_miniupnpd=y" >> .config
 echo "CONFIG_PACKAGE_mkf2fs=y" >> .config
 echo "CONFIG_PACKAGE_mtd=y" >> .config
@@ -261,7 +306,7 @@ echo "CONFIG_PACKAGE_urandom-seed=y" >> .config
 echo "CONFIG_PACKAGE_urngd=y" >> .config
 echo "CONFIG_PACKAGE_vnstat=y" >> .config
 
-# ----------------- 3. 额外追加：Docker 全家桶核心 -----------------
+# ----------------- 4. 追加：Docker 核心组件 -----------------
 echo "CONFIG_PACKAGE_luci-app-dockerman=y" >> .config
 echo "CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y" >> .config
 echo "CONFIG_PACKAGE_docker-compose=y" >> .config
