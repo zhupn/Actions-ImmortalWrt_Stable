@@ -75,6 +75,11 @@ jobs:
       run: cd openwrt && ./scripts/feeds install -a
 
     - name: Load custom configuration
+      env:
+        ROOT_PASS: ${{ secrets.ROOT_PASS }}
+        LAN_ADD: ${{ secrets.LAN_ADD }}
+        PPPOE_USER: ${{ secrets.PPPOE_USER }}
+        PPPOE_PASS: ${{ secrets.PPPOE_PASS }}
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
