@@ -34,7 +34,16 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
+  pre-flight:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check Write Permissions
+        run: echo "权限校验通过"
+        
   build:
+    needs: pre-flight
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -42,6 +51,16 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
+
+    - name: Cache ccache
+      uses: actions/cache@v4
+      with:
+        path: |
+          dl
+          openwrt/ccache
+        key: ${{ runner.os }}-openwrt-${{ hashFiles('**/feeds.conf.default') }}
+        restore-keys: |
+          ${{ runner.os }}-openwrt-   
 
     - name: Initialization environment
       env:
