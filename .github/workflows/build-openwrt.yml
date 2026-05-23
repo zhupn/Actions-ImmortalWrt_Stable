@@ -223,8 +223,8 @@ jobs:
       if: steps.tag.outputs.status == 'success' && !cancelled()  
       uses: appleboy/telegram-action@master 
       env:   
-        TELEGRAM_CHAT_ID: ${{ secrets.ID }}  
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TOKEN }} 
+        TELEGRAM_CHAT_ID: ${{ secrets.TL_ID }}  
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TL_BOT_TOKEN }} 
       with:  
         to: ${{ env.TELEGRAM_CHAT_ID }}  # 替换为你的Telegram聊天ID或用户名  
         token: ${{ env.TELEGRAM_BOT_TOKEN }}  # 替换为你的Telegram Bot Token  
