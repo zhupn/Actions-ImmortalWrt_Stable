@@ -81,9 +81,19 @@ chmod 0644 files/etc/sysupgrade.conf
 #mv /tmp/clash_tun files/etc/openclash/core/clash_tun
 #chmod 0755 files/etc/openclash/core/clash_tun
 #meta内核
-#curl -L https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-amd64.tar.gz | tar -xz -C /tmp
-#mv /tmp/clash files/etc/openclash/core/clash_meta
-#chmod 0755 files/etc/openclash/core/clash_meta
+# 获取最新版本下载地址 (自动匹配 linux-amd64)
+DOWNLOAD_URL=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | \
+               grep "browser_download_url" | \
+               grep "linux-amd64" | \
+               grep -v "v3" | \
+               head -n 1 | \
+               cut -d '"' -f 4)
+
+# 执行下载与解压
+curl -L "$DOWNLOAD_URL" | gzip -d > files/etc/openclash/core/clash_meta
+
+# 赋予执行权限
+chmod 0755 files/etc/openclash/core/clash_meta
 
 #将AdGuardHome核心文件编译进目录
 #curl -s https://api.github.com/repos/AdguardTeam/AdGuardHome/releases/latest \
