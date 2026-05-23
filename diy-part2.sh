@@ -188,6 +188,7 @@ chmod 0755 files/etc/uci-defaults/99-custom-init
 # =================================================================
 #        2. 空间物理扩容 ── 强行将分区直接拉满到 8G
 # =================================================================
+echo "CONFIG_TARGET_ROOTFS_EXT4FS=y" >> .config
 echo "CONFIG_TARGET_ROOTFS_PARTSIZE=8192" >> .config
 sed -i 's/CONFIG_TARGET_KERNEL_PARTSIZE=.*/CONFIG_TARGET_KERNEL_PARTSIZE=64/g' include/target.mk
 
